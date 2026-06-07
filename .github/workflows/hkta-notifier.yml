@@ -2,9 +2,9 @@ name: HKTA Notifier
 
 on:
   schedule:
-    # Every 15 minutes. GitHub Actions cron uses UTC, but */15 is timezone-independent.
+    # Every 30 minutes. GitHub Actions cron uses UTC, but */30 is timezone-independent.
     # Note: GitHub may delay scheduled runs by 5–15 min during peak load — this is normal.
-    - cron: "*/15 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:  # also let you run it manually from the Actions tab
 
 # Required so the job can commit seen.json back to the repo.
@@ -20,6 +20,10 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      # Opt into Node.js 24 early to silence the Node 20 deprecation warning.
+      # Safe to remove this line once GitHub makes Node 24 the default.
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Check out repo
         uses: actions/checkout@v4

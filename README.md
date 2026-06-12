@@ -67,7 +67,7 @@ Then create the workflow file:
    | Name                  | Value                                          |
    |-----------------------|------------------------------------------------|
    | `GMAIL_USER`          | `official.ron.hk@gmail.com`                    |
-   | `GMAIL_APP_PASSWORD`  | `llmw gkee wvhy pzzx`                          |
+   | `GMAIL_APP_PASSWORD`  | your 16-char app password — paste it only here, never into this README |
    | `TO_EMAIL`            | `official.ron.hk@gmail.com`                    |
 
 3. (Optional) To change the fee threshold without editing code: switch to the **Variables** tab → add `MIN_FEE` = `350` (or any number).

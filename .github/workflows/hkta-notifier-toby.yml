@@ -1,0 +1,52 @@
+name: HKTA Notifier (Toby)
+
+on:
+  schedule:
+    # Every 30 minutes, offset 15 min from the main notifier so the two
+    # workflows don't try to push commits at the same moment.
+    - cron: "15,45 * * * *"
+  workflow_dispatch:  # also lets you run it manually from the Actions tab
+
+# Required so the job can commit seen_toby.json back to the repo.
+permissions:
+  contents: write
+
+# Prevent overlapping runs if a previous one is still going.
+concurrency:
+  group: hkta-notifier-toby
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run notifier
+        env:
+          GMAIL_USER:         ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL_TOBY:      ${{ secrets.TO_EMAIL_TOBY }}
+          MIN_FEE_TOBY:       ${{ vars.MIN_FEE_TOBY || '250' }}
+        run: python hkta_notifier_toby.py
+
+      - name: Commit updated seen_toby.json
+        run: |
+          if [[ -n "$(git status --porcelain seen_toby.json)" ]]; then
+            git config user.name  "hkta-notifier-bot"
+            git config user.email "hkta-notifier-bot@users.noreply.github.com"
+            git add seen_toby.json
+            git commit -m "Update seen_toby.json [skip ci]"
+            # The main notifier may have pushed meanwhile — rebase first.
+            git pull --rebase origin main
+            git push
+          else
+            echo "No changes to seen_toby.json."
+          fi
